@@ -1,20 +1,38 @@
-version: '3.1'
+version: '3.7'
 
 services:
   db-master:
     image: mysql:5.7
     environment:
       MYSQL_ROOT_PASSWORD: master
-      MYSQL_DATABASE: masterClassicDB
+      MYSQL_DATABASE: classicmodels
     ports:
       - "3306:3306"
-    command: --server-id=1 --log-bin=mysql-bin --binlog-do-db=mydb
-
+    command: --server-id=1 --log-bin=mysql-bin --binlog-do-db=classicmodels
+    volumes:
+      - ./initdb:/docker-entrypoint-initdb.d
+      - master-data:/var/lib/mysql
   db-slave:
     image: mysql:5.7
+    depends_on:
+      - db-master
     environment:
       MYSQL_ROOT_PASSWORD: slave
-      MYSQL_DATABASE: slaveClassicDB
+      MYSQL_DATABASE: classicmodels
+      MYSQL_ROOT_HOST: "%"
     ports:
       - "3307:3306"
-    command: --server-id=2 --replicate-do-db=mydb
+    command: >
+      --server-id=2
+      --replicate-do-db=classicmodels
+      --relay-log=db-slave-relay-bin
+      --relay-log-index=db-slave-relay-bin.index
+
+    volumes:
+      - ./initdb:/docker-entrypoint-initdb.d
+      - slave-data:/var/lib/mysql
+
+
+volumes:
+  master-data:
+  slave-data:
