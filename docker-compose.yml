@@ -1,0 +1,20 @@
+version: '3.1'
+
+services:
+  db-master:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: master
+      MYSQL_DATABASE: masterClassicDB
+    ports:
+      - "3306:3306"
+    command: --server-id=1 --log-bin=mysql-bin --binlog-do-db=mydb
+
+  db-slave:
+    image: mysql:5.7
+    environment:
+      MYSQL_ROOT_PASSWORD: slave
+      MYSQL_DATABASE: slaveClassicDB
+    ports:
+      - "3307:3306"
+    command: --server-id=2 --replicate-do-db=mydb
